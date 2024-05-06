@@ -32,6 +32,7 @@ Route::prefix("/v1")->group(function() {
     Route::post('/users',[V1\AuthController::class, 'register']);
     Route::post('/users/login',[V1\AuthController::class, 'login']);
 
+    Route::get("/categories", [V1\CategoryController::class, "get"]);
     Route::get("/posts", [V1\PostController::class, 'getAll']);
     Route::get("/posts/{id}", [V1\PostController::class, 'getByID']);
     Route::get("/storagelink", function(Request $request) {

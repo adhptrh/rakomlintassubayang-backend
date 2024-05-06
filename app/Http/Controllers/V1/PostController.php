@@ -18,7 +18,8 @@ class PostController extends Controller
     {
         $validate = $request->validate([
             "title"=>"required",
-            "content"=>"required",
+            "contentHTML"=>"required",
+            "contentText"=>"required",
             "thumbnail"=>["required",File::image()->max(10*1024)]
         ]);
 
@@ -28,8 +29,10 @@ class PostController extends Controller
 
             $post = new Post;
             $post->title = $request->input("title");
-            $post->description = $request->input("content");
+            $post->contentHTML = $request->input("contentHTML");
+            $post->contentText = $request->input("contentText");
             $post->thumbnail = $filename;
+            $post->category = 1;
             $post->author = $request->user()->id;
             $post->save();
 
@@ -45,9 +48,24 @@ class PostController extends Controller
 
     public function update(Request $request, string $id)
     {
+        $request->validate([
+            "title"=>"required",
+            "contentHTML"=>"required",
+            "contentText"=>"required",
+            "category"=>"required",
+            "thumbnail"=>[File::image()->max(10*1024)]
+        ]);
+
         $post = Post::find($id);
         $post->title = $request->input("title");
-        $post->description = $request->input("content");
+        $post->contentHTML = $request->input("contentHTML");
+        $post->contentText = $request->input("contentText");
+        if ($request->file("thumbnail")) {
+            $filename = Str::random(10).strval(floor(microtime(true)*1000)).".".$request->file("thumbnail")->extension();
+            $request->file("thumbnail")->storeAs("images",$filename);
+            $post->thumbnail = $filename;
+        }
+        $post->category = $request->input("category");
         $post->save();
 
         return response()->json([
@@ -67,9 +85,15 @@ class PostController extends Controller
 
     public function getAll(Request $request)
     {
+        if ($request->get("cat")) {
+            return response()->json([
+                "message"=>"success",
+                "data"=>Post::with("category")->where("category", $request->get("cat"))->get()
+            ]);
+        }
         return response()->json([
             "message"=>"success",
-            "data"=>Post::all()
+            "data"=>Post::with("category")->get()
         ]);
     }
 
@@ -80,6 +104,16 @@ class PostController extends Controller
         return response()->json([
             "message"=>"success",
             "data"=>$post
+        ]);
+    }
+
+    public function getByCategory(Request $request, string $id)
+    {
+        $posts = Post::where("categories", $id);
+
+        return response()->json([
+            "message"=>"success",
+            "data"=>$posts
         ]);
     }
 }
