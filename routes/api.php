@@ -36,7 +36,7 @@ Route::prefix("/v1")->group(function() {
     Route::get("/posts", [V1\PostController::class, 'getAll']);
     Route::get("/posts/{id}", [V1\PostController::class, 'getByID']);
     Route::get("/storagelink", function(Request $request) {
-        Artisan::command("storage:link");
+        Artisan::call("storage:link");
     });
 });
 
