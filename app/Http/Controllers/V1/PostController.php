@@ -20,19 +20,27 @@ class PostController extends Controller
             "title"=>"required",
             "contentHTML"=>"required",
             "contentText"=>"required",
-            "thumbnail"=>["required",File::image()->max(10*1024)]
+            "thumbnail"=>["required",File::image()->max(10*1024)],
+            "audio"=>"nullable|file|mimes:audio/mpeg,mpega,mp3,wav,aac,x-m4a,m4a",
         ]);
 
         if (Auth::check($validate)) {
             $filename = Str::random(10).strval(floor(microtime(true)*1000)).".".$request->file("thumbnail")->extension();
             $request->file("thumbnail")->storeAs("images",$filename);
 
+            $filenameAudio = null;
+            if ($request->file("audio")->isValid()) {
+                $filenameAudio = Str::random(10).strval(floor(microtime(true)*1000)).".".$request->file("audio")->extension();
+                $request->file("audio")->storeAs("audio",$filenameAudio);
+            }
+
             $post = new Post;
             $post->title = $request->input("title");
             $post->contentHTML = $request->input("contentHTML");
             $post->contentText = $request->input("contentText");
             $post->thumbnail = $filename;
-            $post->category = 1;
+            $post->audio = $filenameAudio;
+            $post->category = $request->input("category");
             $post->author = $request->user()->id;
             $post->save();
 
