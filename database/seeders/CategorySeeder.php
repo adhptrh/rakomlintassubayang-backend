@@ -28,5 +28,11 @@ class CategorySeeder extends Seeder
         $cat = new Category;
         $cat->name = "Berita";
         $cat->save();
+        $cat = new Category;
+        $cat->name = "Audio";
+        $cat->save();
+        $cat = new Category;
+        $cat->name = "Serba Serbi";
+        $cat->save();
     }
 }
